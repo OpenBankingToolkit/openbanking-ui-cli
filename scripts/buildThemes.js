@@ -19,8 +19,6 @@ const COPY_ANGULARJSON = path.join(PACKAGE_ROOT, "angular.save.json");
 process.on("SIGINT", async () => await cleanup());
 
 module.exports = async function run(args) {
-  console.log("args", args);
-  console.log("__dirname", process.cwd());
   try {
     // save original angular.json
     await fs.copy(ORIGINAL_ANGULARJSON, COPY_ANGULARJSON);
@@ -59,7 +57,7 @@ module.exports = async function run(args) {
     console.error(error);
     await cleanup();
   }
-}
+};
 
 async function cleanup() {
   // putting original angular.json back

@@ -13,12 +13,7 @@ const orderByDefault = 50;
 async function generateIndexHtml(app, customer, assetsByChunkName = {}) {
   try {
     const configs = [];
-    configs.push(
-      require(path.join(
-        PACKAGE_ROOT,
-        "/scripts/indexHtml/default-build-settings.js"
-      ))
-    );
+    configs.push(require("./default-build-settings.js"));
     configs.push(
       require(path.join(
         PACKAGE_ROOT,

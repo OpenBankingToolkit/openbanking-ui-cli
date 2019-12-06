@@ -5,7 +5,7 @@ const ejs = require("ejs");
 const minify = require("html-minifier").minify;
 const _get = require("lodash/get");
 const _merge = require("lodash/merge");
-const _unionBy = require("lodash/unionby");
+const _unionBy = require("lodash/unionBy");
 
 const PACKAGE_ROOT = process.cwd();
 const orderByDefault = 50;

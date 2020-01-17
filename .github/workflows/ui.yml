@@ -1,0 +1,27 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - master
+
+env:
+  NPM_ACCESS_TOKEN: ${{ secrets.NPM_ACCESS_TOKEN }}
+  GITHUB_ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+
+jobs:
+  build:
+    name: Publish
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@master
+      - name: Create .npmrc file
+        run: echo "//registry.npmjs.org/:_authToken=\${NPM_ACCESS_TOKEN}" > .npmrc
+      - name: Install Dependencies
+        run: npm ci
+      - name: Build
+        run: |
+          npm run build
+      - name: Publish
+        run: npm publish

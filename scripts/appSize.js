@@ -27,7 +27,6 @@ module.exports = async function run() {
       "build",
       "--project",
       project,
-      "--prod",
       "--configuration",
       theme,
       "--output-path",

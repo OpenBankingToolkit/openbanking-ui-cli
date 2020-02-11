@@ -71,7 +71,6 @@ async function build(project, customer) {
     "build",
     "--project",
     project,
-    "--prod",
     "--configuration",
     customer,
     "--output-path",

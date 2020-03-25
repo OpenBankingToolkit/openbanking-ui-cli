@@ -82,6 +82,7 @@ async function build(project, customer) {
     ]);
     await postBuild(project, customer);
   } catch (error) {
+    console.error(error);
     process.exit(1);
   }
 }

@@ -66,5 +66,6 @@ module.exports = async function run() {
       );
   } catch (error) {
     console.error(error);
+    process.exit(1);
   }
 };

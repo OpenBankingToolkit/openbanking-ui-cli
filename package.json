@@ -1,6 +1,6 @@
 {
   "name": "@forgerock/openbanking-ui-cli",
-  "version": "0.0.2",
+  "version": "1.0.1",
   "description": "Tooling necessary to build OpenBanking apps",
   "main": "index.js",
   "scripts": {

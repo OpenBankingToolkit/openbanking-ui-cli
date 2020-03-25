@@ -5,10 +5,6 @@ on:
     branches:
       - master
 
-env:
-  NPM_ACCESS_TOKEN: ${{ secrets.NPM_ACCESS_TOKEN }}
-  GITHUB_ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
-
 jobs:
   build:
     name: Publish
@@ -17,6 +13,6 @@ jobs:
       - name: Checkout Repo
         uses: actions/checkout@master
       - name: Create .npmrc file
-        run: echo "//registry.npmjs.org/:_authToken=\${NPM_ACCESS_TOKEN}" > .npmrc
+        run: echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_ACCESS_TOKEN }}" > .npmrc
       - name: Publish
         run: npm publish

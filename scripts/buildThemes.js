@@ -67,19 +67,23 @@ async function cleanup() {
 
 async function build(project, customer) {
   console.info(`Building ${project} for ${customer}`);
-  await exec({ silent: true }, "ng", [
-    "build",
-    "--project",
-    project,
-    "--configuration",
-    customer,
-    "--output-path",
-    `dist/${customer}`,
-    "--extra-webpack-config",
-    "webpack.extra.js",
-    ...(customer === PRINCIPAL_THEME ? ["--statsJson"] : [])
-  ]);
-  await postBuild(project, customer);
+  try {
+    await exec({ silent: true }, "ng", [
+      "build",
+      "--project",
+      project,
+      "--configuration",
+      customer,
+      "--output-path",
+      `dist/${customer}`,
+      "--extra-webpack-config",
+      "webpack.extra.js",
+      ...(customer === PRINCIPAL_THEME ? ["--statsJson"] : [])
+    ]);
+    await postBuild(project, customer);
+  } catch (error) {
+    process.exit(1);
+  }
 }
 
 async function updateAngularJson(configPath, projectName, customers) {

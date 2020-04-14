@@ -8,7 +8,7 @@ const fs = require("fs-extra"),
   _kebabCase = require("lodash/kebabCase");
 
 const PACKAGE_ROOT = process.cwd(),
-  THEMES_FOLDER = path.join(PACKAGE_ROOT, "themes");
+  THEMES_FOLDER = path.join(PACKAGE_ROOT, options.outputFolder || "themes");
 
 module.exports = async function run() {
   try {
@@ -23,10 +23,10 @@ module.exports = async function run() {
       path.join(THEMES_FOLDER, themeName)
     );
 
-    if (options.customization) {
+    if (options.customizationPath) {
       // making sure customization path exists
-      await fs.access(options.customization);
-      const { theme, imgs } = await fs.readJson(options.customization);
+      await fs.access(options.customizationPath);
+      const { theme, imgs } = await fs.readJson(options.customizationPath);
       await handleTheme(themeName, theme);
       await handleImages(themeName, imgs);
     }
@@ -52,11 +52,13 @@ async function handleTheme(themeName, theme) {
       `
 $${key}-palette: (
   ${getScssProps(cssVars[key], 2)},
-${contrast &&
+${
+  contrast &&
   `  contrast: (
     ${contrast}
   )
-`});
+`
+});
 `
     );
   }, "");
@@ -87,8 +89,8 @@ ${contrast &&
  */
 function getScssProps(map, indent = 0) {
   return Object.keys(map || {})
-    .filter(key => !key.match(/(contrast|alpha)/))
-    .map(key => `${key}: rgba(${map[key]}, ${map[key + "-alpha"] || 1})`)
+    .filter((key) => !key.match(/(contrast|alpha)/))
+    .map((key) => `${key}: rgba(${map[key]}, ${map[key + "-alpha"] || 1})`)
     .join(",\n" + Array(indent + 1).join(" "));
 }
 
@@ -100,7 +102,7 @@ function getScssProps(map, indent = 0) {
 function parseCssVars(cssVars) {
   const cssMap = {};
 
-  Object.keys(cssVars).forEach(key => {
+  Object.keys(cssVars).forEach((key) => {
     key
       .match(/^--palette-([a-zA-Z0-9]*)-(contrast)?-?(.*)/)
       .slice(1)

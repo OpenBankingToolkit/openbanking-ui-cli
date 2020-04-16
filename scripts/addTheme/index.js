@@ -2,6 +2,7 @@
 
 const fs = require("fs-extra"),
   path = require("path"),
+  ejs = require("ejs"),
   minimist = require("minimist"),
   options = minimist(process.argv.slice(2)),
   _get = require("lodash/get"),
@@ -26,19 +27,51 @@ module.exports = async function run() {
     if (options.customizationPath) {
       // making sure customization path exists
       await fs.access(options.customizationPath);
-      const { theme, imgs } = await fs.readJson(options.customizationPath);
+      const { theme, imgs, metadata = {}, customer = {} } = await fs.readJson(
+        options.customizationPath
+      );
       await handleTheme(themeName, theme);
       await handleImages(themeName, imgs);
+      await exportBuildSettings(themeName, { metadata });
+      await exportDeploymentSettings(themeName, { customer });
     }
   } catch (error) {
     console.error(error);
   }
 };
 
+async function exportTemplate(inputPath, outputPath, templateData) {
+  await fs.access(inputPath);
+
+  const templateContent = await fs.readFile(inputPath);
+
+  await fs.writeFile(
+    outputPath,
+    ejs.render(templateContent.toString(), templateData)
+  );
+  console.info(`${outputPath} created`);
+}
+
+async function exportBuildSettings(themeName, templateData) {
+  await exportTemplate(
+    path.join(__dirname, "build-settings.template"),
+    path.join(THEMES_FOLDER, themeName, "build-settings.js"),
+    templateData
+  );
+}
+
+async function exportDeploymentSettings(themeName, templateData) {
+  await exportTemplate(
+    path.join(__dirname, "deployment-settings.template"),
+    path.join(THEMES_FOLDER, themeName, "deployment-settings.js"),
+    templateData
+  );
+}
+
 /**
- * Processes the contents of the theme.json customization file and outputs it as SCSS
+ * Processes the contents of the customization file and outputs it as SCSS
  *
- * @param data
+ * @param themeName
  * @param theme {[key: string]: string}
  */
 async function handleTheme(themeName, theme) {

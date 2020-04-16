@@ -1,0 +1,12 @@
+module.exports = {
+  defaultSettings: {
+    client: {
+      name: '<%= customer.name %>',
+      contact: '<%= customer.contact %>',
+      support: '<%= customer.support %>',
+      privacy: '<%= customer.privacy %>',
+      terms: '<%= customer.terms %>',
+      about: '<%= customer.about %>'
+    }
+  }
+};

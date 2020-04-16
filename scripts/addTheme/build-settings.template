@@ -1,0 +1,29 @@
+module.exports = {
+  defaultSettings: {
+    html: {
+      head: [
+        {
+          id: 'title',
+          tag: '<title><%= metadata.title %></title>',
+          order: 1
+        },
+        {
+          id: 'description',
+          tag: '<meta name="description" content="<%= metadata.description %>">',
+          order: 2
+        },
+        {
+          id: 'og:title',
+          tag: '<meta name="og:title" property="og:title" content="<%= metadata.title %>">',
+          order: 3
+        },
+        {
+          id: 'og:description',
+          tag: '<meta name="og:description" property="og:description" content="<%= metadata.description %>">',
+          order: 4
+        }
+      ],
+      body: []
+    }
+  }
+};

@@ -42,6 +42,20 @@ module.exports = async function run() {
           description: metadata.description,
         }
       );
+      await exportSplashscreen(themeName, {
+        colors: {
+          background: theme["--palette-primary-500"]
+            ? `rgba(${theme["--palette-primary-500"]}, ${
+                theme["--palette-primary-500-alpha"] || 1
+              })`
+            : "",
+          spinner: theme["--palette-background-background"]
+            ? `rgba(${theme["--palette-background-background"]}, ${
+                theme["--palette-background-background-alpha"] || 1
+              })`
+            : "",
+        },
+      });
       await exportBuildSettings(themeName, { metadata, favicons });
       await exportDeploymentSettings(themeName, { customer });
     }
@@ -61,7 +75,7 @@ function svgToBuffer(favicon) {
 async function exportFavicons(themeName, favicon, { name, description }) {
   if (!favicon) {
     console.info("Favicons will not be created");
-    return Promise.resolve('');
+    return Promise.resolve("");
   }
   const fileBuffer = await svgToBuffer(favicon);
   const faviconsPath = "/assets/favicons";
@@ -134,6 +148,14 @@ async function exportTemplate(inputPath, outputPath, templateData) {
     ejs.render(templateContent.toString(), templateData)
   );
   console.info(`${outputPath} created`);
+}
+
+async function exportSplashscreen(themeName, templateData) {
+  await exportTemplate(
+    path.join(__dirname, "splashscreen.template"),
+    path.join(THEMES_FOLDER, themeName, "assets/splashscreen.css"),
+    templateData
+  );
 }
 
 async function exportBuildSettings(themeName, templateData) {

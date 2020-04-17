@@ -5,7 +5,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: #eee;
+  background-color: <%= colors.background ? colors.background : '#eee' %> ;
   z-index: 99999;
   pointer-events: none;
 }
@@ -73,7 +73,7 @@
   width: 100px;
   height: 100px;
   box-sizing: border-box;
-  border: 10px solid black;
+  border: 10px solid <%= colors.spinner ? colors.spinner : 'black' %>;
   border-bottom-color: transparent;
   border-radius: 50%;
 }

@@ -4,6 +4,8 @@ const fs = require("fs-extra"),
   path = require("path"),
   ejs = require("ejs"),
   minimist = require("minimist"),
+  favicons = require("favicons"),
+  svg2img = require("svg2img"),
   options = minimist(process.argv.slice(2)),
   _get = require("lodash/get"),
   _kebabCase = require("lodash/kebabCase");
@@ -32,7 +34,15 @@ module.exports = async function run() {
       );
       await handleTheme(themeName, theme);
       await handleImages(themeName, imgs);
-      await exportBuildSettings(themeName, { metadata });
+      const favicons = await exportFavicons(
+        themeName,
+        _get(imgs, "favicon.file"),
+        {
+          name: customer.name,
+          description: metadata.description,
+        }
+      );
+      await exportBuildSettings(themeName, { metadata, favicons });
       await exportDeploymentSettings(themeName, { customer });
     }
   } catch (error) {
@@ -40,12 +50,86 @@ module.exports = async function run() {
   }
 };
 
+function svgToBuffer(favicon) {
+  return new Promise((res, rej) => {
+    svg2img(favicon, (error, buffer) => {
+      if (error) rej(error);
+      res(buffer);
+    });
+  });
+}
+async function exportFavicons(themeName, favicon, { name, description }) {
+  if (!favicon) {
+    console.info("Favicons will not be created");
+    return Promise.resolve('');
+  }
+  const fileBuffer = await svgToBuffer(favicon);
+  const faviconsPath = "/assets/favicons";
+  return new Promise((res, rej) => {
+    favicons(
+      fileBuffer,
+      {
+        path: faviconsPath, // Path for overriding default icons path. `string`
+        appName: name || null, // Your application's name. `string`
+        appShortName: name || null, // Your application's short_name. `string`. Optional. If not set, appName will be used
+        appDescription: description || null, // Your application's description. `string`
+        developerName: null, // Your (or your developer's) name. `string`
+        developerURL: null, // Your (or your developer's) URL. `string`
+        dir: "auto", // Primary text direction for name, short_name, and description
+        lang: "en-US", // Primary language for name and short_name
+        background: "#fff", // Background colour for flattened icons. `string`
+        theme_color: "#fff", // Theme color user for example in Android's task switcher. `string`
+        appleStatusBarStyle: "black-translucent", // Style for Apple status bar: "black-translucent", "default", "black". `string`
+        display: "standalone", // Preferred display mode: "fullscreen", "standalone", "minimal-ui" or "browser". `string`
+        orientation: "any", // Default orientation: "any", "natural", "portrait" or "landscape". `string`
+        scope: "/", // set of URLs that the browser considers within your app
+        start_url: "/?homescreen=1", // Start URL when launching the application from a device. `string`
+        version: "1.0", // Your application's version string. `string`
+        logging: false, // Print logs to console? `boolean`
+        pixel_art: false, // Keeps pixels "sharp" when scaling up, for pixel art.  Only supported in offline mode.
+        loadManifestWithCredentials: false, // Browsers don't send cookies when fetching a manifest, enable this to fix that. `boolean`
+        icons: {
+          android: true, // Create Android homescreen icon. `boolean` or `{ offset, background, mask, overlayGlow, overlayShadow }`
+          appleIcon: true, // Create Apple touch icons. `boolean` or `{ offset, background, mask, overlayGlow, overlayShadow }`
+          appleStartup: false, // Create Apple startup images. `boolean` or `{ offset, background, mask, overlayGlow, overlayShadow }`
+          coast: false, // Create Opera Coast icon. `boolean` or `{ offset, background, mask, overlayGlow, overlayShadow }`
+          favicons: true, // Create regular favicons. `boolean` or `{ offset, background, mask, overlayGlow, overlayShadow }`
+          firefox: false, // Create Firefox OS icons. `boolean` or `{ offset, background, mask, overlayGlow, overlayShadow }`
+          windows: false, // Create Windows 8 tile icons. `boolean` or `{ offset, background, mask, overlayGlow, overlayShadow }`
+          yandex: false, // Create Yandex browser icon. `boolean` or `{ offset, background, mask, overlayGlow, overlayShadow }`
+        },
+      },
+      async (error, response) => {
+        if (error) {
+          console.log(error.message); // Error description e.g. "An unknown error has occurred"
+          rej(error);
+        }
+        [...response.images, ...response.files].forEach(
+          async ({ name, contents }) => {
+            const outputPath = path.join(
+              THEMES_FOLDER,
+              themeName,
+              faviconsPath,
+              name
+            );
+            await fs.outputFile(outputPath, contents);
+            console.info(`${outputPath} created`);
+          }
+        );
+        res(response.html.join(""));
+      }
+    );
+  });
+
+  console.info(`${outputPath} created`);
+}
+
 async function exportTemplate(inputPath, outputPath, templateData) {
   await fs.access(inputPath);
 
   const templateContent = await fs.readFile(inputPath);
 
-  await fs.writeFile(
+  await fs.outputFile(
     outputPath,
     ejs.render(templateContent.toString(), templateData)
   );
@@ -177,6 +261,18 @@ async function handleImages(themeName, imgs) {
       "icon.svg"
     );
     await fs.outputFile(iconPath, icon);
+    console.info(`${iconPath} created`);
+  }
+
+  if (favicon) {
+    const iconPath = path.join(
+      THEMES_FOLDER,
+      themeName,
+      "assets",
+      "logos",
+      "favicon.svg"
+    );
+    await fs.outputFile(iconPath, favicon);
     console.info(`${iconPath} created`);
   }
 }

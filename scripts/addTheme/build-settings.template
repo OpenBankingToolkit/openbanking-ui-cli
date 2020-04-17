@@ -21,7 +21,11 @@ module.exports = {
           id: 'og:description',
           tag: '<meta name="og:description" property="og:description" content="<%= metadata.description %>">',
           order: 4
-        }
+        }<% if (favicons) { %>,
+        {
+          id: 'favicons',
+          tag: '<%- favicons %>',
+        }<% } %>
       ],
       body: []
     }

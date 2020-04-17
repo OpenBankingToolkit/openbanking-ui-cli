@@ -32,6 +32,13 @@ module.exports = async function run() {
       const { theme, imgs, metadata = {}, customer = {} } = await fs.readJson(
         options.customizationPath
       );
+
+      // Copy customization.json file to be able to rerun
+      await fs.copy(
+        options.customizationPath,
+        path.join(THEMES_FOLDER, themeName, "customization.json")
+      );
+
       await handleTheme(themeName, theme);
       await handleImages(themeName, imgs);
       const favicons = await exportFavicons(

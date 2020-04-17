@@ -44,14 +44,14 @@ module.exports = async function run() {
       );
       await exportSplashscreen(themeName, {
         colors: {
-          background: theme["--palette-primary-500"]
-            ? `rgba(${theme["--palette-primary-500"]}, ${
-                theme["--palette-primary-500-alpha"] || 1
-              })`
-            : "",
-          spinner: theme["--palette-background-background"]
+          background: theme["--palette-background-background"]
             ? `rgba(${theme["--palette-background-background"]}, ${
                 theme["--palette-background-background-alpha"] || 1
+              })`
+            : "",
+          spinner: theme["--palette-primary-500"]
+            ? `rgba(${theme["--palette-primary-500"]}, ${
+                theme["--palette-primary-500-alpha"] || 1
               })`
             : "",
         },

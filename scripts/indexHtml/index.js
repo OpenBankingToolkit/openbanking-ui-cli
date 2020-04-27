@@ -6,6 +6,7 @@ const minify = require("html-minifier").minify;
 const _get = require("lodash/get");
 const _merge = require("lodash/merge");
 const _unionBy = require("lodash/unionBy");
+const fs = require("fs-extra");
 
 const PACKAGE_ROOT = process.cwd();
 const orderByDefault = 50;
@@ -20,14 +21,14 @@ async function generateIndexHtml(app, customer, assetsByChunkName = {}) {
         `/projects/${app}/docker/build-settings.js`
       ))
     );
-    if (customer !== "forgerock") {
-      const customerBuildSettings = path.join(
-        PACKAGE_ROOT,
-        `/themes/${customer}/build-settings.js`
-      );
+    const customerBuildSettings = path.join(
+      PACKAGE_ROOT,
+      `/themes/${customer}/build-settings.js`
+    );
+    if (fs.existsSync(customerBuildSettings)) {
       const {
         defaultSettings = {},
-        appsSettings = {}
+        appsSettings = {},
       } = require(customerBuildSettings);
       configs.push(_merge({}, defaultSettings, appsSettings[app]));
     }
@@ -38,7 +39,7 @@ async function generateIndexHtml(app, customer, assetsByChunkName = {}) {
     // we can't pass variables to it yet and it would require a refactor
     head.push({
       id: "metaCustomer",
-      tag: `<meta name="customer" content="${customer}" />`
+      tag: `<meta name="customer" content="${customer}" />`,
     });
     const body = mergeArrayOfAssets(configs, "html.body");
     const sortByOrder = (a, b) =>
@@ -52,7 +53,7 @@ async function generateIndexHtml(app, customer, assetsByChunkName = {}) {
     return await minify(content, {
       html5: true,
       removeComments: true,
-      collapseWhitespace: true
+      collapseWhitespace: true,
     });
   } catch (error) {
     console.error(error);
@@ -61,7 +62,7 @@ async function generateIndexHtml(app, customer, assetsByChunkName = {}) {
 
 function mergeArrayOfAssets(configList, path = "", key = "id") {
   let finalConf = [];
-  configList.forEach(config => {
+  configList.forEach((config) => {
     finalConf = _unionBy(_get(config, path, []), finalConf, key);
   });
   return finalConf;
@@ -74,7 +75,7 @@ function getIndexHtmlTagsFromStats(stats = {}) {
     main,
     polyfills,
     styles,
-    scripts
+    scripts,
   } = stats;
 
   return {
@@ -83,43 +84,43 @@ function getIndexHtmlTagsFromStats(stats = {}) {
         {
           id: "styles",
           tag: `<link rel="stylesheet" href="${styles}">`,
-          order: 51
-        }
+          order: 51,
+        },
       ],
       body: [
         {
           id: "runtime",
           tag: `<script type="text/javascript" src="${runtime}"></script>`,
-          order: 10
+          order: 10,
         },
         {
           id: "es2015-polyfills",
           tag: `<script type="text/javascript" src="${es2015Polyfills}" nomodule></script>`,
-          order: 11
+          order: 11,
         },
         {
           id: "polyfills",
           tag: `<script type="text/javascript" src="${polyfills}"></script>`,
-          order: 12
+          order: 12,
         },
         {
           id: "scripts",
           tag: `<script type="text/javascript" src="${scripts}"></script>`,
-          order: 13
+          order: 13,
         },
         {
           id: "main",
           tag: `<script type="text/javascript" src="${main}"></script>`,
-          order: 14
-        }
-      ]
-    }
+          order: 14,
+        },
+      ],
+    },
   };
 }
 
 async function renderTemplate(path, data = {}, options = {}) {
   return new Promise((resolve, reject) => {
-    ejs.renderFile(path, data, options, function(err, str) {
+    ejs.renderFile(path, data, options, function (err, str) {
       if (err) {
         reject(err);
       } else {
@@ -130,5 +131,5 @@ async function renderTemplate(path, data = {}, options = {}) {
 }
 
 module.exports = {
-  generateIndexHtml
+  generateIndexHtml,
 };
